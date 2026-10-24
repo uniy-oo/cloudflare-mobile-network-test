@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>网络测试</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: max(24px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom)); background: #f6f7fb; color: #111827; font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+    main { width: min(100%, 520px); margin: 0 auto; }
+    h1 { margin: 12px 0 20px; font-size: 38px; line-height: 1.2; }
+    p { margin: 0 0 20px; font-size: 22px; line-height: 1.6; }
+    button { width: 100%; min-height: 60px; margin-bottom: 24px; border: 0; border-radius: 16px; background: #1267e5; color: white; font-size: 22px; font-weight: 700; }
+    button:active { transform: scale(.98); }
+    video { display: block; width: 100%; max-height: 64vh; border-radius: 16px; background: #000; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>网络测试</h1>
+    <p id="clock" aria-live="off">正在读取北京时间…</p>
+    <button id="sound" type="button">点我测试</button>
+    <video controls preload="metadata" playsinline src="./test-video.mp4">当前浏览器不支持视频播放。</video>
+  </main>
+  <script>
+    const clock = document.querySelector('#clock');
+    const updateClock = () => {
+      clock.textContent = '当前北京时间：' + new Intl.DateTimeFormat('zh-CN', {
+        timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+      }).format(new Date());
+    };
+    updateClock();
+    setInterval(updateClock, 1000);
+    document.querySelector('#sound').addEventListener('click', () => {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      const audio = new AudioContext();
+      const oscillator = audio.createOscillator();
+      const gain = audio.createGain();
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audio.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(1320, audio.currentTime + 0.16);
+      gain.gain.setValueAtTime(0.0001, audio.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.22, audio.currentTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.28);
+      oscillator.connect(gain).connect(audio.destination);
+      oscillator.start(); oscillator.stop(audio.currentTime + 0.3);
+      oscillator.addEventListener('ended', () => audio.close());
+    });
+  </script>
+</body>
+</html>
